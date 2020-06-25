@@ -1,0 +1,82 @@
+{
+  "name": "eggd_bam_cleaner",
+  "title": "eggd_bam_cleaner",
+  "summary": "App to remove duplicate reads from a BAM and optionally remove multimapped reads",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "bam",
+      "label": "BAM file",
+      "class": "file",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "multi_bool",
+      "label": "Remove multi-mapped reads",
+      "class": "boolean",
+      "optional": true,
+      "default": true,
+      "help": ""
+    },
+    {
+      "name": "mapq",
+      "label": "MAPQ threshold",
+      "class": "int",
+      "optional": true,
+      "default": 20,
+      "help": ""
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "bam",
+      "label": "BAM file",
+      "class": "file",
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "index",
+      "label": "index file",
+      "class": "file",
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    }
+  ],
+  "runSpec": {
+    "timeoutPolicy": {
+      "*": {
+        "hours": 1
+      }
+    },
+    "interpreter": "bash",
+    "release": "16.04",
+    "distribution": "Ubuntu",
+    "file": "src/eggd_bam_cleaner.sh",
+    "version": "1"
+  },
+  "access": {
+    "project": "CONTRIBUTE",
+    "network": [
+      "*"
+    ]
+  },
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem1_ssd1_v2_x4"
+        }
+      }
+    }
+  }
+}
