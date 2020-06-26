@@ -4,16 +4,22 @@ set -e -x -o pipefail
 
 main() {
 
+    # input variables
     echo "Value of bam: '$bam'"
     echo "Value of multi_bool: '$multi_bool'"
     echo "Value of MAPQ threshold: '$mapq"
 
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
+    # unpack and build samtools
+    cd /packages
+    tar -jxvf samtools-1.10.tar.bz2
+    cd samtools-1.10
+    ./configure --prefix=/packages
+    make
+    make install
+    export PATH=/packages/bin:$PATH
 
-    mkdir files && cd files
+    # working dir to download bams to
+    mkdir ~/files && cd ~/files
 
     dx download "$bam" -o input_bam
 
@@ -27,28 +33,28 @@ main() {
 
     # sorting bam by pos, req. for markdup
     echo "sorting bam by coordinates"
-    samtools sort -o pos_sort.bam fixmate.input_bam
+    samtools sort -o pos_sort.bam fixmate.bam
 
     # removing duplicates with markdup
     echo "removing duplicates"
     samtools markdup -r pos_sort.bam rm_dup.bam
 
-    if "$multi_bool"; then
+    if [[ "$multi_bool" ]]; then
         # multi bool true => remove multi-mapped reads
-        # default threshold 20 unless specified
+        # default threshold ($mapq) 20 unless specified 
         echo "removing multi mapped reads"
-        output_bam="${bam}_rm_dup_multimap.bam"
+        output_bam="${bam_name}_rm_dup_rm_multimap.bam"
         
         samtools view -q $mapq -b rm_dup.bam > "$output_bam"
         samtools index $output_bam
     else
         # multi_bool false => not removing mult-mapped reads
-        output_bam="${bam}_rm_dup.bam"
+        output_bam="${bam_name}_rm_dup.bam"
         samtools index $output_bam
+    fi
 
-
-    bam=$(dx upload output_bam --brief)
-    index=$(dx upload "{output_bam}.bai" --brief)
+    bam=$(dx upload $output_bam --brief)
+    index=$(dx upload "${output_bam}.bai" --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
