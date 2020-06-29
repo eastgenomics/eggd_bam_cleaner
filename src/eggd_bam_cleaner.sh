@@ -9,6 +9,15 @@ main() {
     echo "Value of multi_bool: '$multi_bool'"
     echo "Value of MAPQ threshold: '$mapq"
 
+    # remove _markdup if present in name
+    if [[ $bam_name =~ "_markdup" ]]
+    then
+        echo "markdup in name"
+        bam_name="${bam_name/_markdup/}"
+    else
+        echo "not in name"
+    fi
+
     # unpack and build samtools
     cd /packages
     tar -jxvf samtools-1.10.tar.bz2
@@ -17,6 +26,8 @@ main() {
     make
     make install
     export PATH=/packages/bin:$PATH
+
+    echo "finished building samtools, beginning analysis"
 
     # working dir to download bams to
     mkdir ~/files && cd ~/files
@@ -43,13 +54,13 @@ main() {
         # multi bool true => remove multi-mapped reads
         # default threshold ($mapq) 20 unless specified 
         echo "removing multi mapped reads"
-        output_bam="${bam_name}_rm_dup_rm_multimap.bam"
+        output_bam="${bam_name/.bam/_rm_dup_rm_multimap.bam}"
         
         samtools view -q $mapq -b rm_dup.bam > "$output_bam"
         samtools index $output_bam
     else
         # multi_bool false => not removing mult-mapped reads
-        output_bam="${bam_name}_rm_dup.bam"
+        output_bam="${bam_name/.bam/_rm_dup.bam}"
         samtools index $output_bam
     fi
 
