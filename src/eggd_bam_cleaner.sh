@@ -12,10 +12,7 @@ main() {
     # remove _markdup if present in name
     if [[ $bam_name =~ "_markdup" ]]
     then
-        echo "markdup in name"
         bam_name="${bam_name/_markdup/}"
-    else
-        echo "not in name"
     fi
 
     # unpack and build samtools
@@ -64,13 +61,9 @@ main() {
         samtools index $output_bam
     fi
 
+    # upload output files
     bam=$(dx upload $output_bam --brief)
     index=$(dx upload "${output_bam}.bai" --brief)
-
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
 
     dx-jobutil-add-output bam "$bam" --class=file
     dx-jobutil-add-output index "$index" --class=file
